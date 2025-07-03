@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Account Dashboard</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% load static %}{% static 'css/dashboard.css' %}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chart-line me-2"></i>Smart Accounts
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-tachometer-alt me-1"></i>Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-plus me-1"></i>Add Transaction</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-list me-1"></i>Transactions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#"><i class="fas fa-chart-pie me-1"></i>Reports</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ user.username|default:"User" }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <!-- Welcome Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="text-primary">Welcome back, {{ user.first_name|default:"User" }}!</h2>
+                <p class="text-muted">Here's your financial overview for this month</p>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <!-- Total Balance Card -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card summary-card balance-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-muted mb-1">Total Balance</h6>
+                                <h3 class="text-success mb-0">$12,450.00</h3>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i> +2.5% from last month
+                                </small>
+                            </div>
+                            <div class="summary-icon bg-success">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Income Card -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card summary-card income-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-muted mb-1">Monthly Income</h6>
+                                <h3 class="text-primary mb-0">$8,750.00</h3>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i> +5.2% from last month
+                                </small>
+                            </div>
+                            <div class="summary-icon bg-primary">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Expenses Card -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card summary-card expense-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-muted mb-1">Monthly Expenses</h6>
+                                <h3 class="text-danger mb-0">$3,240.00</h3>
+                                <small class="text-danger">
+                                    <i class="fas fa-arrow-up"></i> +1.8% from last month
+                                </small>
+                            </div>
+                            <div class="summary-icon bg-danger">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Card -->
+            <div class="col-lg-3 col-md-6 mb-3">
+                <div class="card summary-card savings-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="card-title text-muted mb-1">Monthly Savings</h6>
+                                <h3 class="text-info mb-0">$5,510.00</h3>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up"></i> +8.7% from last month
+                                </small>
+                            </div>
+                            <div class="summary-icon bg-info">
+                                <i class="fas fa-piggy-bank"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Analytics -->
+        <div class="row mb-4">
+            <!-- Spending Categories Chart -->
+            <div class="col-lg-6 mb-3">
+                <div class="card chart-card">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-pie me-2 text-primary"></i>Spending by Category
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="categoryChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Monthly Trend Chart -->
+            <div class="col-lg-6 mb-3">
+                <div class="card chart-card">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line me-2 text-success"></i>Income vs Expenses
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="trendChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions and Quick Actions -->
+        <div class="row">
+            <!-- Recent Transactions -->
+            <div class="col-lg-8 mb-3">
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-clock me-2 text-warning"></i>Recent Transactions
+                        </h5>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Description</th>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Type</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Jan 15, 2025</td>
+                                        <td>Grocery Shopping</td>
+                                        <td><span class="badge bg-warning">Food</span></td>
+                                        <td class="text-danger">-$85.50</td>
+                                        <td><i class="fas fa-arrow-up text-danger"></i> Expense</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jan 14, 2025</td>
+                                        <td>Salary Deposit</td>
+                                        <td><span class="badge bg-success">Income</span></td>
+                                        <td class="text-success">+$3,500.00</td>
+                                        <td><i class="fas fa-arrow-down text-success"></i> Income</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jan 13, 2025</td>
+                                        <td>Gas Station</td>
+                                        <td><span class="badge bg-info">Transport</span></td>
+                                        <td class="text-danger">-$45.20</td>
+                                        <td><i class="fas fa-arrow-up text-danger"></i> Expense</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jan 12, 2025</td>
+                                        <td>Coffee Shop</td>
+                                        <td><span class="badge bg-warning">Food</span></td>
+                                        <td class="text-danger">-$12.75</td>
+                                        <td><i class="fas fa-arrow-up text-danger"></i> Expense</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jan 11, 2025</td>
+                                        <td>Freelance Payment</td>
+                                        <td><span class="badge bg-success">Income</span></td>
+                                        <td class="text-success">+$750.00</td>
+                                        <td><i class="fas fa-arrow-down text-success"></i> Income</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="col-lg-4 mb-3">
+                <div class="card">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-bolt me-2 text-warning"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-3">
+                            <button class="btn btn-success btn-lg">
+                                <i class="fas fa-plus me-2"></i>Add Income
+                            </button>
+                            <button class="btn btn-danger btn-lg">
+                                <i class="fas fa-minus me-2"></i>Add Expense
+                            </button>
+                            <button class="btn btn-info btn-lg">
+                                <i class="fas fa-exchange-alt me-2"></i>Transfer Money
+                            </button>
+                            <button class="btn btn-warning btn-lg">
+                                <i class="fas fa-file-export me-2"></i>Export Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget Progress -->
+                <div class="card mt-3">
+                    <div class="card-header bg-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-target me-2 text-primary"></i>Budget Progress
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Food & Dining</small>
+                                <small>$450 / $600</small>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-warning" style="width: 75%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Transportation</small>
+                                <small>$180 / $300</small>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-info" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Entertainment</small>
+                                <small>$120 / $200</small>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" style="width: 60%"></div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Shopping</small>
+                                <small>$380 / $400</small>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="{% load static %}{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>
