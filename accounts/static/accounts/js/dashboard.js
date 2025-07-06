@@ -448,7 +448,7 @@ function updateDateTime() {
     const welcomeSection = document.querySelector('.container-fluid .text-muted');
     if (welcomeSection) {
         const baseText = "Here's your financial overview for this month";
-        welcomeSection.textContent = `${baseText} • Updated: ${now.toLocaleDateString('en-US', options)}`;
+        welcomeSection.textContent = ` • Updated: ${now.toLocaleDateString('en-US', options)}`;
     }
 }
 

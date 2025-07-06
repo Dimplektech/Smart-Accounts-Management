@@ -121,8 +121,9 @@ class Category(models.Model):
         now = timezone.now()
         start_of_month = datetime(now.year, now.month, 1)
 
-        return self.transaction.filter(
-            date__gte=start_of_month, date__lt=now
+        return self.transactions.filter(
+            date__gte=start_of_month,
+            date__lt=now
         ).aggregate(total=models.Sum("amount"))["total"] or Decimal("0.00")
 
 
@@ -166,7 +167,7 @@ class Transaction(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     # optional fields
-    notnotes = models.TextField(blank=True)
+    notes = models.TextField(blank=True)
     receipt_image = models.ImageField(upload_to="receipts/", blank=True)
     location = models.CharField(max_length=200, blank=True)
 
@@ -233,7 +234,7 @@ class Budget(models.Model):
     def spent_amount(self):
         """Calculate the total amount spent in this budget period."""
 
-        return self.category.transaction.filter(
+        return self.category.transactions.filter(
             date__gte=self.start_date,
             date__lte=self.end_date,
             transaction_type="expense",
@@ -337,11 +338,7 @@ class RecurringTransaction(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     next_due_date = models.DateField()
-
-    frequency = models.CharField(max_length=20, choices=FREQUENCY_CHOICES)
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
-    next_due_date = models.DateField()
+    
 
     def __str__(self):
         return f"{self.name} - {self.get_frequency_display()}"
@@ -377,7 +374,7 @@ class RecurringTransaction(models.Model):
         elif self.frequency == "bi_weekly":
             self.next_due_date += timedelta(weeks=2)
         elif self.frequency == "monthly":
-            self.next_due_date += relativedelta(month=1)
+            self.next_due_date += relativedelta(months=1)
         elif self.frequency == "quarterly":
             self.next_due_date += relativedelta(months=3)
         elif self.frequency == "yearly":
