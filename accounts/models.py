@@ -338,6 +338,7 @@ class RecurringTransaction(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     next_due_date = models.DateField()
+    is_active = models.BooleanField(default=True)
     
 
     def __str__(self):

@@ -8,7 +8,7 @@ from .models import Account, Transaction, Category, Budget, AccountType, Categor
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['transaction_type', 'account', 'category', 'amount', 'description', 'date', 'payment_method']
+        fields = ['transaction_type', 'account', 'category', 'amount', 'description', 'date', 'payment_methods']
         widgets = {
             'date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }
@@ -20,6 +20,11 @@ class TransactionForm(forms.ModelForm):
         self.fields['account'].queryset = Account.objects.filter(user=user, is_active=True)
         self.fields['category'].queryset = Category.objects.filter(user=user)
         
+        # Set default date to now
+        if not self.instance.pk:  # Only for new transactions
+            from django.utils import timezone
+            self.fields['date'].initial = timezone.now()
+
         # Crispy Forms Helper
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -53,7 +58,7 @@ class TransactionForm(forms.ModelForm):
             
             Row(
                 Column('date', css_class='form-group col-md-6'),
-                Column('payment_method', css_class='form-group col-md-6'),
+                Column('payment_methods', css_class='form-group col-md-6'),
                 css_class='form-row'
             ),
             
@@ -68,11 +73,18 @@ class TransactionForm(forms.ModelForm):
             HTML('</div>'),
             HTML('</div>'),
         )
+    
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount and amount <= 0:
+            raise forms.ValidationError("Amount must be greater than zero.")
+        return amount
+    
 
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ['name', 'account_type', 'account_number', 'initial_balance', 'description']
+        fields = ['name', 'account_type', 'account_number', 'initial_balance', 'bank_name']
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -102,7 +114,7 @@ class AccountForm(forms.ModelForm):
                 css_class='form-row'
             ),
             
-            'description',
+            'bank_name',
             
             HTML('</div>'),
             HTML('<div class="card-footer">'),
@@ -164,7 +176,7 @@ class CategoryForm(forms.ModelForm):
 class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
-        fields = ['name', 'category', 'amount', 'start_date', 'end_date', 'description']
+        fields = ['name', 'category', 'amount', 'start_date', 'end_date']
         widgets = {
             'start_date': forms.DateInput(attrs={'type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
@@ -205,7 +217,7 @@ class BudgetForm(forms.ModelForm):
                 css_class='form-row'
             ),
             
-            'description',
+            
             
             HTML('</div>'),
             HTML('<div class="card-footer">'),

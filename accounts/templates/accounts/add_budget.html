@@ -1,0 +1,14 @@
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Add Budget - Smart Account Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% crispy form %}
+        </div>
+    </div>
+</div>
+{% endblock %}

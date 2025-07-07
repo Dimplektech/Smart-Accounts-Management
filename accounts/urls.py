@@ -16,5 +16,13 @@ urlpatterns = [
     # Transaction URLs
     path('transactions/', views.transaction_list_view, name='transaction_list'),
     path('add-transaction/', views.add_transaction_view, name='add_transaction'),
+
+    # Account URLs
     path('accounts/', views.account_list_view, name='account_list'),
+    path('add-account/', views.add_account_view, name='add_account'),
+    path('account/<int:account_id>/', views.account_detail_view, name='account_detail'),
+
+    # Budget URLs
+    path('budgets/', views.budget_list_view, name='budget_list'),
+    path('add-budget/', views.add_budget_view, name='add_budget'),
 ]

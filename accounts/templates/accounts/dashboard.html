@@ -1,6 +1,10 @@
-{% extends 'accounts/base.html' %} {% load static %} {% block title %}Dashboard
-- Smart Account Management{% endblock %} {% block content %}
+<!-- accounts/templates/accounts/dashboard.html -->
+{% extends 'accounts/base.html' %}
+{% load static %}
 
+{% block title %}Dashboard - Smart Account Management{% endblock %}
+
+{% block content %}
 <!-- Main Content -->
 <div class="container-fluid mt-4">
   <!-- Welcome Section -->
@@ -9,14 +13,11 @@
       <h2 class="text-primary">
         Welcome back, {{ user.first_name|default:"User" }}!
       </h2>
-      <p class="text-muted fw-bold fw-bold text-primary"></p>
+      <p class="text-muted">Here's your financial overview</p>
     </div>
     <div class="col-md-4 text-end">
       <div class="welcome-actions">
-        <button
-          class="btn btn-light btn-sm me-2"
-          onclick="refreshDashboardData()"
-        >
+        <button class="btn btn-light btn-sm me-2" onclick="location.reload()">
           <i class="fas fa-sync-alt me-1"></i>Refresh
         </button>
         <button class="btn btn-outline-light btn-sm" onclick="exportReport()">
@@ -37,7 +38,7 @@
               <h6 class="card-title text-muted mb-1">Total Balance</h6>
               <h3 class="text-success mb-0">${{ total_balance|floatformat:2 }}</h3>
               <small class="text-muted">
-                        <i class="fas fa-calendar me-1"></i>{{ current_month }}
+                <i class="fas fa-calendar me-1"></i>All Accounts
               </small>
             </div>
             <div class="summary-icon bg-success">
@@ -48,7 +49,7 @@
       </div>
     </div>
 
-   <!-- Monthly Income Card -->
+    <!-- Monthly Income Card -->
     <div class="col-lg-3 col-md-6 mb-3">
       <div class="card summary-card income-card">
         <div class="card-body">
@@ -57,11 +58,11 @@
               <h6 class="card-title text-muted mb-1">Monthly Income</h6>
               <h3 class="text-primary mb-0">${{ monthly_income|floatformat:2 }}</h3>
               <small class="text-success">
-                        <i class="fas fa-arrow-up"></i>This month
+                <i class="fas fa-arrow-up"></i>This month
               </small>
             </div>
             <div class="summary-icon bg-primary">
-              <i class="fas fa-arrow-down"></i>
+              <i class="fas fa-plus"></i>
             </div>
           </div>
         </div>
@@ -77,27 +78,29 @@
               <h6 class="card-title text-muted mb-1">Monthly Expenses</h6>
               <h3 class="text-danger mb-0">${{ monthly_expenses|floatformat:2 }}</h3>
               <small class="text-danger">
-                        <i class="fas fa-arrow-down"></i>This month
+                <i class="fas fa-minus"></i>This month
               </small>
             </div>
             <div class="summary-icon bg-danger">
-              <i class="fas fa-arrow-up"></i>
+              <i class="fas fa-credit-card"></i>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Savings Card -->
+    <!-- Net Savings Card -->
     <div class="col-lg-3 col-md-6 mb-3">
       <div class="card summary-card savings-card">
         <div class="card-body">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h6 class="card-title text-muted mb-1">Monthly Savings</h6>
-              <h3 class="text-info mb-0">$5,510.00</h3>
-              <small class="text-success">
-                <i class="fas fa-arrow-up"></i> +8.7% from last month
+              <h3 class="{% if monthly_income > monthly_expenses %}text-success{% else %}text-danger{% endif %} mb-0">
+                ${{ monthly_income|floatformat:2|add:"-"|add:monthly_expenses|floatformat:2 }}
+              </h3>
+              <small class="text-muted">
+                <i class="fas fa-piggy-bank"></i>Income - Expenses
               </small>
             </div>
             <div class="summary-icon bg-info">
@@ -116,8 +119,7 @@
       <div class="card chart-card">
         <div class="card-header bg-white">
           <h5 class="card-title mb-0">
-            <i class="fas fa-chart-pie me-2 text-primary"></i>Spending by
-            Category
+            <i class="fas fa-chart-pie me-2 text-primary"></i>Spending by Category
           </h5>
         </div>
         <div class="card-body">
@@ -131,12 +133,11 @@
       <div class="card chart-card">
         <div class="card-header bg-white">
           <h5 class="card-title mb-0">
-            <i class="fas fa-chart-line me-2 text-success"></i>Income vs
-            Expenses
+            <i class="fas fa-chart-line me-2 text-success"></i>Income vs Expenses
           </h5>
         </div>
         <div class="card-body">
-          <canvas id="trendChart" height="300"></canvas>
+          <canvas id="monthlyChart" height="300"></canvas>
         </div>
       </div>
     </div>
@@ -147,13 +148,11 @@
     <!-- Recent Transactions -->
     <div class="col-lg-8 mb-3">
       <div class="card">
-        <div
-          class="card-header bg-white d-flex justify-content-between align-items-center"
-        >
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
           <h5 class="card-title mb-0">
             <i class="fas fa-clock me-2 text-warning"></i>Recent Transactions
           </h5>
-          <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+          <a href="{% url 'accounts:transaction_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
         </div>
         <div class="card-body p-0">
           <div class="table-responsive">
@@ -164,64 +163,36 @@
                   <th>Description</th>
                   <th>Category</th>
                   <th>Amount</th>
-                  <th>Type</th>
+                  <th>Account</th>
                 </tr>
-             <tbody>
-                    {% for transaction in recent_transactions %}
-                    <tr>
-                        <td>{{ transaction.date|date:"M d, Y" }}</td>
-                        <td>{{ transaction.description }}</td>
-                        <td>
-                            <span class="badge {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
-                                {{ transaction.category.name }}
-                            </span>
-                        </td>
-                        <td class="{% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
-                            {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}${{ transaction.amount|floatformat:2 }}
-                        </td>
-                        <td>{{ transaction.account.name }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No transactions yet</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+              </thead>
+              <tbody>
+                {% for transaction in recent_transactions %}
                 <tr>
-                  <td>Jan 15, 2025</td>
-                  <td>Grocery Shopping</td>
-                  <td><span class="badge bg-warning">Food</span></td>
-                  <td class="text-danger">-$85.50</td>
-                  <td><i class="fas fa-arrow-up text-danger"></i> Expense</td>
+                  <td>{{ transaction.date|date:"M d, Y" }}</td>
+                  <td>{{ transaction.description }}</td>
+                  <td>
+                    <span class="badge {% if transaction.transaction_type == 'income' %}bg-success{% elif transaction.transaction_type == 'expense' %}bg-danger{% else %}bg-info{% endif %}">
+                      {{ transaction.category.name }}
+                    </span>
+                  </td>
+                  <td class="{% if transaction.transaction_type == 'income' %}text-success{% elif transaction.transaction_type == 'expense' %}text-danger{% else %}text-info{% endif %}">
+                    {% if transaction.transaction_type == 'income' %}+{% elif transaction.transaction_type == 'expense' %}-{% endif %}${{ transaction.amount|floatformat:2 }}
+                  </td>
+                  <td>{{ transaction.account.name }}</td>
                 </tr>
+                {% empty %}
                 <tr>
-                  <td>Jan 14, 2025</td>
-                  <td>Salary Deposit</td>
-                  <td><span class="badge bg-success">Income</span></td>
-                  <td class="text-success">+$3,500.00</td>
-                  <td><i class="fas fa-arrow-down text-success"></i> Income</td>
+                  <td colspan="5" class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-2x mb-2 d-block"></i>
+                    No transactions yet
+                    <br>
+                    <a href="{% url 'accounts:add_transaction' %}" class="btn btn-primary btn-sm mt-2">
+                      <i class="fas fa-plus me-1"></i>Add Your First Transaction
+                    </a>
+                  </td>
                 </tr>
-                <tr>
-                  <td>Jan 13, 2025</td>
-                  <td>Gas Station</td>
-                  <td><span class="badge bg-info">Transport</span></td>
-                  <td class="text-danger">-$45.20</td>
-                  <td><i class="fas fa-arrow-up text-danger"></i> Expense</td>
-                </tr>
-                <tr>
-                  <td>Jan 12, 2025</td>
-                  <td>Coffee Shop</td>
-                  <td><span class="badge bg-warning">Food</span></td>
-                  <td class="text-danger">-$12.75</td>
-                  <td><i class="fas fa-arrow-up text-danger"></i> Expense</td>
-                </tr>
-                <tr>
-                  <td>Jan 11, 2025</td>
-                  <td>Freelance Payment</td>
-                  <td><span class="badge bg-success">Income</span></td>
-                  <td class="text-success">+$750.00</td>
-                  <td><i class="fas fa-arrow-down text-success"></i> Income</td>
-                </tr>
+                {% endfor %}
               </tbody>
             </table>
           </div>
@@ -239,18 +210,18 @@
         </div>
         <div class="card-body">
           <div class="d-grid gap-3">
-            <button class="btn btn-success btn-lg">
-              <i class="fas fa-plus me-2"></i>Add Income
-            </button>
-            <button class="btn btn-danger btn-lg">
-              <i class="fas fa-minus me-2"></i>Add Expense
-            </button>
-            <button class="btn btn-info btn-lg">
-              <i class="fas fa-exchange-alt me-2"></i>Transfer Money
-            </button>
-            <button class="btn btn-warning btn-lg">
-              <i class="fas fa-file-export me-2"></i>Export Report
-            </button>
+            <a href="{% url 'accounts:add_transaction' %}" class="btn btn-success btn-lg">
+              <i class="fas fa-plus me-2"></i>Add Transaction
+            </a>
+            <a href="{% url 'accounts:add_account' %}" class="btn btn-primary btn-lg">
+              <i class="fas fa-university me-2"></i>Add Account
+            </a>
+            <a href="{% url 'accounts:add_budget' %}" class="btn btn-warning btn-lg">
+              <i class="fas fa-target me-2"></i>Add Budget
+            </a>
+            <a href="{% url 'accounts:transaction_list' %}" class="btn btn-info btn-lg">
+              <i class="fas fa-list me-2"></i>View Reports
+            </a>
           </div>
         </div>
       </div>
@@ -263,51 +234,54 @@
           </h5>
         </div>
         <div class="card-body">
+          {% for budget in active_budgets %}
           <div class="mb-3">
             <div class="d-flex justify-content-between mb-1">
-              <small>Food & Dining</small>
-              <small>$450 / $600</small>
+              <small>{{ budget.name }}</small>
+              <small>${{ budget.spent_amount|floatformat:2 }} / ${{ budget.amount|floatformat:2 }}</small>
             </div>
             <div class="progress">
-              <div class="progress-bar bg-warning" style="width: 75%"></div>
+              <div class="progress-bar {% if budget.is_over_budget %}bg-danger{% else %}bg-success{% endif %}" 
+                   style="width: {% if budget.percentage_used > 100 %}100{% else %}{{ budget.percentage_used }}{% endif %}%">
+                {{ budget.percentage_used|floatformat:1 }}%
+              </div>
             </div>
           </div>
-          <div class="mb-3">
-            <div class="d-flex justify-content-between mb-1">
-              <small>Transportation</small>
-              <small>$180 / $300</small>
-            </div>
-            <div class="progress">
-              <div class="progress-bar bg-info" style="width: 60%"></div>
-            </div>
-          </div>
-          <div class="mb-3">
-            <div class="d-flex justify-content-between mb-1">
-              <small>Entertainment</small>
-              <small>$120 / $200</small>
-            </div>
-            <div class="progress">
-              <div class="progress-bar bg-success" style="width: 60%"></div>
-            </div>
-          </div>
-          <div class="mb-3">
-            <div class="d-flex justify-content-between mb-1">
-              <small>Shopping</small>
-              <small>$380 / $400</small>
-            </div>
-            <div class="progress">
-              <div class="progress-bar bg-danger" style="width: 95%"></div>
-            </div>
-          </div>
+          {% empty %}
+          <p class="text-muted text-center">
+            No active budgets
+            <br>
+            <a href="{% url 'accounts:add_budget' %}" class="btn btn-sm btn-warning mt-2">
+              <i class="fas fa-plus me-1"></i>Create Budget
+            </a>
+          </p>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
 </div>
-{% endblock %} {% block extra_js %}
-<!-- Dashboard-specific JavaScript -->
-<script>
-  // Dashboard-specific JS code here
-  console.log("Dashboard loaded");
+{% endblock %}
+
+{% block extra_js %}
+
+
+<!-- Hidden data elements for JavaScript -->
+<script id="category-data" type="application/json">
+{
+    "labels": [{% for cat in category_spending %}"{{ cat.category__name }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+    "data": [{% for cat in category_spending %}{{ cat.total }}{% if not forloop.last %},{% endif %}{% endfor %}]
+}
 </script>
+
+<script id="monthly-data" type="application/json">
+{
+    "labels": [{% for data in monthly_data %}"{{ data.month }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+    "income": [{% for data in monthly_data %}{{ data.income }}{% if not forloop.last %},{% endif %}{% endfor %}],
+    "expenses": [{% for data in monthly_data %}{{ data.expenses }}{% if not forloop.last %},{% endif %}{% endfor %}]
+}
+</script>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}
