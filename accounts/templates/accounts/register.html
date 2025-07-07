@@ -1,0 +1,19 @@
+<!-- accounts/templates/accounts/register.html -->
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - Smart Account Management{% endblock %}
+
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                {% crispy form %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

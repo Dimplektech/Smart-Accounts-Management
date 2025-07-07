@@ -476,7 +476,7 @@ function updateSummaryCards() {
         const newValue = Math.max(0, currentValue + variation);
         
         const isNegative = value.textContent.includes('-');
-        const prefix = isNegative ? '-$' : '$';
+        const prefix = isNegative ? '-£' : '£';
         value.textContent = prefix + newValue.toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
