@@ -8,7 +8,7 @@ from django.db.models import Count, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Transaction, Account, Category, Budget
-from .forms import TransactionForm, AccountForm, CategoryForm, BudgetForm
+from .forms import TransactionForm, AccountForm, BudgetForm
 
 
 def create_default_data(user):
@@ -303,7 +303,7 @@ def transaction_list_view(request):
         "current_type": type_filter,
     }
 
-    return render(request, "accounts/transactions.html", context)
+    return render(request, "accounts/transaction_list.html", context)
 
 
 @login_required
@@ -400,23 +400,28 @@ def add_budget_view(request):
 
 
 @login_required
-def add_account_view(request):
-    """Add a new account"""
-    if request.method == "POST":
-        form = AccountForm(request.POST)
+def add_account(request):
+    if request.method == 'POST':
+        form = AccountForm(request.POST, user=request.user)
         if form.is_valid():
             account = form.save(commit=False)
             account.user = request.user
             account.save()
-
-            messages.success(request, f'Account "{account.name}" created successfully!')
-            return redirect("accounts:account_list")
+            
+            messages.success(
+                request, 
+                f'Account "{account.name}" created successfully with account number {account.account_number}!'
+            )
+            return redirect('accounts:account_list')  # or wherever you want to redirect
         else:
-            messages.error(request, "Please correct the errors below.")
+            messages.error(request, 'Please correct the errors below.')
     else:
-        form = AccountForm()
-
-    return render(request, "accounts/add_account.html", {"form": form})
+        form = AccountForm(user=request.user)
+    
+    return render(request, 'accounts/add_account.html', {
+        'form': form,
+        'title': 'Add New Account'
+    })
 
 
 @login_required

@@ -1,231 +1,343 @@
 # accounts/forms.py
 from django import forms
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Row, Column, Submit, HTML, Div, Field
-from crispy_forms.bootstrap import FormActions
 from .models import Account, Transaction, Category, Budget, AccountType, Category_type
+from decimal import Decimal
 
 class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
         fields = ['transaction_type', 'account', 'category', 'amount', 'description', 'date', 'payment_methods']
         widgets = {
-            'date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'transaction_type': forms.Select(attrs={
+                'class': 'form-select',
+                'id': 'transactionType'
+            }),
+            'account': forms.Select(attrs={
+                'class': 'form-select',
+                'id': 'account'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-select',
+                'id': 'category'
+            }),
+            'amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0.01',
+                'placeholder': '0.00'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Enter transaction description...'
+            }),
+            'date': forms.DateTimeInput(attrs={
+                'type': 'datetime-local',
+                'class': 'form-control'
+            }),
+            'payment_methods': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+        }
+        labels = {
+            'transaction_type': 'Transaction Type',
+            'account': 'Account',
+            'category': 'Category',
+            'amount': 'Amount',
+            'description': 'Description',
+            'date': 'Date & Time',
+            'payment_methods': 'Payment Method',
         }
     
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
         # Filter accounts and categories by user
-        self.fields['account'].queryset = Account.objects.filter(user=user, is_active=True)
-        self.fields['category'].queryset = Category.objects.filter(user=user)
+        if user:
+            self.fields['account'].queryset = Account.objects.filter(user=user, is_active=True)
+            self.fields['category'].queryset = Category.objects.filter(user=user)
         
         # Set default date to now
         if not self.instance.pk:  # Only for new transactions
             from django.utils import timezone
             self.fields['date'].initial = timezone.now()
-
-        # Crispy Forms Helper
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.form_class = 'form-horizontal'
-        self.helper.label_class = 'col-md-3'
-        self.helper.field_class = 'col-md-9'
         
-        self.helper.layout = Layout(
-            HTML('<div class="card">'),
-            HTML('<div class="card-header bg-primary text-white">'),
-            HTML('<h4 class="mb-0"><i class="fas fa-plus me-2"></i>Add New Transaction</h4>'),
-            HTML('</div>'),
-            HTML('<div class="card-body">'),
-            
-            Row(
-                Column('transaction_type', css_class='form-group col-md-6'),
-                Column('account', css_class='form-group col-md-6'),
-                css_class='form-row'
-            ),
-            
-            Row(
-                Column('category', css_class='form-group col-md-6'),
-                Column(
-                    Field('amount', template='crispy_forms/bootstrap5/field_with_prepend.html', prepend='$'),
-                    css_class='form-group col-md-6'
-                ),
-                css_class='form-row'
-            ),
-            
-            'description',
-            
-            Row(
-                Column('date', css_class='form-group col-md-6'),
-                Column('payment_methods', css_class='form-group col-md-6'),
-                css_class='form-row'
-            ),
-            
-            HTML('</div>'),
-            HTML('<div class="card-footer">'),
-            FormActions(
-                HTML('<a href="{% url "accounts:dashboard" %}" class="btn btn-secondary me-2">'
-                     '<i class="fas fa-arrow-left me-1"></i>Cancel</a>'),
-                Submit('submit', 'Save Transaction', css_class='btn btn-primary',
-                       css_id='submit-transaction'),
-            ),
-            HTML('</div>'),
-            HTML('</div>'),
-        )
+        # Set empty labels
+        self.fields['transaction_type'].empty_label = "-- Select Type --"
+        self.fields['account'].empty_label = "-- Select Account --"
+        self.fields['category'].empty_label = "-- Select Category --"
+        self.fields['payment_methods'].empty_label = "-- Select Payment Method --"
     
     def clean_amount(self):
         amount = self.cleaned_data.get('amount')
         if amount and amount <= 0:
             raise forms.ValidationError("Amount must be greater than zero.")
         return amount
-    
+
 
 class AccountForm(forms.ModelForm):
     class Meta:
         model = Account
-        fields = ['name', 'account_type', 'account_number', 'initial_balance', 'bank_name']
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        
-        self.helper.layout = Layout(
-            HTML('<div class="card">'),
-            HTML('<div class="card-header bg-success text-white">'),
-            HTML('<h4 class="mb-0"><i class="fas fa-university me-2"></i>Account Information</h4>'),
-            HTML('</div>'),
-            HTML('<div class="card-body">'),
-            
-            Row(
-                Column('name', css_class='form-group col-md-8'),
-                Column('account_type', css_class='form-group col-md-4'),
-                css_class='form-row'
-            ),
-            
-            Row(
-                Column('account_number', css_class='form-group col-md-6'),
-                Column(
-                    Field('initial_balance', template='crispy_forms/bootstrap5/field_with_prepend.html', prepend='$'),
-                    css_class='form-group col-md-6'
-                ),
-                css_class='form-row'
-            ),
-            
-            'bank_name',
-            
-            HTML('</div>'),
-            HTML('<div class="card-footer">'),
-            FormActions(
-                HTML('<a href="{% url "accounts:account_list" %}" class="btn btn-secondary me-2">'
-                     '<i class="fas fa-arrow-left me-1"></i>Cancel</a>'),
-                Submit('submit', 'Save Account', css_class='btn btn-success'),
-            ),
-            HTML('</div>'),
-            HTML('</div>'),
-        )
-
-class CategoryForm(forms.ModelForm):
-    class Meta:
-        model = Category
-        fields = ['name', 'category_type', 'color', 'icon', 'description']
+        fields = [
+            'name', 
+            'account_type', 
+            'account_number', 
+            'initial_balance', 
+            'bank_name'
+        ]
         widgets = {
-            'color': forms.TextInput(attrs={'type': 'color'}),
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Main Checking, Emergency Savings'
+            }),
+            'account_type': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'account_number': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., 1234567890 (optional - will auto-generate if empty)'
+            }),
+            'initial_balance': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'placeholder': '0.00',
+                'min': '0'
+            }),
+            'bank_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Chase Bank, Wells Fargo (optional)'
+            }),
         }
-    
+        labels = {
+            'name': 'Account Name',
+            'account_type': 'Account Type',
+            'account_number': 'Account Number',
+            'initial_balance': 'Initial Balance',
+            'bank_name': 'Bank Name',
+        }
+
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
+        # Set field requirements
+        self.fields['name'].required = True
+        self.fields['account_type'].required = True
+        self.fields['initial_balance'].required = True
+        self.fields['account_number'].required = False  
+        self.fields['bank_name'].required = False
         
-        self.helper.layout = Layout(
-            HTML('<div class="card">'),
-            HTML('<div class="card-header bg-info text-white">'),
-            HTML('<h4 class="mb-0"><i class="fas fa-tags me-2"></i>Category Information</h4>'),
-            HTML('</div>'),
-            HTML('<div class="card-body">'),
-            
-            Row(
-                Column('name', css_class='form-group col-md-6'),
-                Column('category_type', css_class='form-group col-md-6'),
-                css_class='form-row'
-            ),
-            
-            Row(
-                Column('color', css_class='form-group col-md-6'),
-                Column('icon', css_class='form-group col-md-6'),
-                css_class='form-row'
-            ),
-            
-            'description',
-            
-            HTML('</div>'),
-            HTML('<div class="card-footer">'),
-            FormActions(
-                HTML('<a href="{% url "accounts:dashboard" %}" class="btn btn-secondary me-2">'
-                     '<i class="fas fa-arrow-left me-1"></i>Cancel</a>'),
-                Submit('submit', 'Save Category', css_class='btn btn-info'),
-            ),
-            HTML('</div>'),
-            HTML('</div>'),
-        )
+        # Filter account types to only active ones
+        self.fields['account_type'].queryset = AccountType.objects.filter(is_active=True)
+        self.fields['account_type'].empty_label = "-- Select Account Type --"
+        
+        # Set help texts
+        self.fields['name'].help_text = "Enter a descriptive name for your account"
+        self.fields['account_number'].help_text = "Leave blank to auto-generate a unique account number"
+        self.fields['initial_balance'].help_text = "Enter the current balance of this account"
+        self.fields['bank_name'].help_text = "Optional: Name of the bank or financial institution"
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if not name or len(name.strip()) < 2:
+            raise forms.ValidationError("Account name must be at least 2 characters long.")
+        return name.strip()
+
+    def clean_initial_balance(self):
+        balance = self.cleaned_data.get('initial_balance')
+        if balance is None:
+            raise forms.ValidationError("Initial balance is required.")
+        if balance < 0:
+            raise forms.ValidationError("Initial balance cannot be negative.")
+        return balance
+
+    def clean_account_number(self):
+        account_number = self.cleaned_data.get('account_number')
+        if account_number:
+            account_number = account_number.strip()
+            # Check if account number already exists
+            if Account.objects.filter(account_number=account_number).exclude(pk=self.instance.pk if self.instance else None).exists():
+                raise forms.ValidationError("An account with this number already exists.")
+        return account_number
+
 
 class BudgetForm(forms.ModelForm):
     class Meta:
         model = Budget
         fields = ['name', 'category', 'amount', 'start_date', 'end_date']
         widgets = {
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
-            'end_date': forms.DateInput(attrs={'type': 'date'}),
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Monthly Groceries, Entertainment Budget'
+            }),
+            'category': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'amount': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'step': '0.01',
+                'min': '0.01',
+                'placeholder': '0.00'
+            }),
+            'start_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+            'end_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control'
+            }),
+        }
+        labels = {
+            'name': 'Budget Name',
+            'category': 'Category',
+            'amount': 'Budget Amount',
+            'start_date': 'Start Date',
+            'end_date': 'End Date',
         }
     
-    def __init__(self, user, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         
-        # Filter categories by user
-        self.fields['category'].queryset = Category.objects.filter(
-            user=user, 
-            category_type__name='expense'
-        )
+        # Filter categories by user and expense type
+        if user:
+            self.fields['category'].queryset = Category.objects.filter(
+                user=user, 
+                category_type__name='expense'
+            )
         
-        self.helper = FormHelper()
-        self.helper.form_method = 'post'
+        # Set empty label
+        self.fields['category'].empty_label = "-- Select Category --"
         
-        self.helper.layout = Layout(
-            HTML('<div class="card">'),
-            HTML('<div class="card-header bg-warning text-dark">'),
-            HTML('<h4 class="mb-0"><i class="fas fa-target me-2"></i>Budget Information</h4>'),
-            HTML('</div>'),
-            HTML('<div class="card-body">'),
-            
-            Row(
-                Column('name', css_class='form-group col-md-8'),
-                Column(
-                    Field('amount', template='crispy_forms/bootstrap5/field_with_prepend.html', prepend='$'),
-                    css_class='form-group col-md-4'
-                ),
-                css_class='form-row'
-            ),
-            
-            Row(
-                Column('category', css_class='form-group col-md-4'),
-                Column('start_date', css_class='form-group col-md-4'),
-                Column('end_date', css_class='form-group col-md-4'),
-                css_class='form-row'
-            ),
-            
-            
-            
-            HTML('</div>'),
-            HTML('<div class="card-footer">'),
-            FormActions(
-                HTML('<a href="{% url "accounts:dashboard" %}" class="btn btn-secondary me-2">'
-                     '<i class="fas fa-arrow-left me-1"></i>Cancel</a>'),
-                Submit('submit', 'Save Budget', css_class='btn btn-warning'),
-            ),
-            HTML('</div>'),
-            HTML('</div>'),
-        )
+        # Set help texts
+        self.fields['name'].help_text = "Give your budget a descriptive name"
+        self.fields['amount'].help_text = "Set the maximum amount for this budget"
+        self.fields['start_date'].help_text = "When does this budget period start?"
+        self.fields['end_date'].help_text = "When does this budget period end?"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        start_date = cleaned_data.get('start_date')
+        end_date = cleaned_data.get('end_date')
+        
+        if start_date and end_date:
+            if start_date >= end_date:
+                raise forms.ValidationError("End date must be after start date.")
+        
+        return cleaned_data
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount and amount <= 0:
+            raise forms.ValidationError("Budget amount must be greater than zero.")
+        return amount
+
+
+# Additional forms if you need them
+
+class CategoryForm(forms.ModelForm):
+    class Meta:
+        model = Category
+        fields = ['name', 'category_type', 'icon', 'color']
+        widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., Food & Dining, Transportation'
+            }),
+            'category_type': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'icon': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'e.g., 🍽️, 🚗, 💰'
+            }),
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'class': 'form-control form-control-color'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        
+        # Set empty label
+        self.fields['category_type'].empty_label = "-- Select Type --"
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your username',
+            'autofocus': True
+        }),
+        label='Username'
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your password'
+        }),
+        label='Password'
+    )
+
+
+class RegistrationForm(forms.Form):
+    username = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Choose a username'
+        }),
+        label='Username'
+    )
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your email address'
+        }),
+        label='Email Address'
+    )
+    first_name = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your first name'
+        }),
+        label='First Name'
+    )
+    last_name = forms.CharField(
+        max_length=30,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Enter your last name'
+        }),
+        label='Last Name'
+    )
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Choose a strong password'
+        }),
+        label='Password'
+    )
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Confirm your password'
+        }),
+        label='Confirm Password'
+    )
+
+    def clean_password2(self):
+        password1 = self.cleaned_data.get('password1')
+        password2 = self.cleaned_data.get('password2')
+        
+        if password1 and password2 and password1 != password2:
+            raise forms.ValidationError("Passwords don't match.")
+        
+        return password2

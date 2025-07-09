@@ -35,7 +35,7 @@ class Account(models.Model):
         AccountType, on_delete=models.CASCADE, related_name="accounts_type"
     )
     name = models.CharField(max_length=100)
-    account_number = models.CharField(max_length=20, unique=True)
+    account_number = models.CharField(max_length=20, unique=True, blank=True)
     balance = models.DecimalField(
         max_digits=15, decimal_places=2, default=Decimal("0.00")
     )

@@ -1,0 +1,275 @@
+<!-- accounts/templates/accounts/reports.html -->
+{% extends 'accounts/base.html' %}
+{% load static %}
+
+{% block title %}Reports & Analytics - Smart Account Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="text-primary">
+                <i class="fas fa-chart-bar me-2"></i>Reports & Analytics
+            </h2>
+            <p class="text-muted">Comprehensive financial insights and analysis</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <div class="btn-group">
+                <a href="{% url 'accounts:export_transactions' %}" class="btn btn-success">
+                    <i class="fas fa-download me-1"></i>Export CSV
+                </a>
+                <a href="{% url 'accounts:budget_performance' %}" class="btn btn-info">
+                    <i class="fas fa-target me-1"></i>Budget Analysis
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Date Range Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="GET" class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" 
+                                   value="{{ start_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="end_date" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" 
+                                   value="{{ end_date|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-filter me-1"></i>Update Report
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-1">Total Income</h6>
+                            <h3 class="text-success mb-0">${{ income_total|floatformat:2 }}</h3>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>Selected Period
+                            </small>
+                        </div>
+                        <div class="summary-icon bg-success">
+                            <i class="fas fa-arrow-up"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-1">Total Expenses</h6>
+                            <h3 class="text-danger mb-0">${{ expenses_total|floatformat:2 }}</h3>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>Selected Period
+                            </small>
+                        </div>
+                        <div class="summary-icon bg-danger">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card border-{% if net_income >= 0 %}success{% else %}danger{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-1">Net Income</h6>
+                            <h3 class="{% if net_income >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">
+                                ${{ net_income|floatformat:2 }}
+                            </h3>
+                            <small class="text-muted">
+                                <i class="fas fa-trending-{% if net_income >= 0 %}up{% else %}down{% endif %} me-1"></i>
+                                {% if net_income >= 0 %}Positive{% else %}Negative{% endif %}
+                            </small>
+                        </div>
+                        <div class="summary-icon bg-{% if net_income >= 0 %}success{% else %}danger{% endif %}">
+                            <i class="fas fa-balance-scale"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card summary-card border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title text-muted mb-1">Transactions</h6>
+                            <h3 class="text-info mb-0">{{ transactions_count }}</h3>
+                            <small class="text-muted">
+                                <i class="fas fa-exchange-alt me-1"></i>Total Count
+                            </small>
+                        </div>
+                        <div class="summary-icon bg-info">
+                            <i class="fas fa-list"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Monthly Trends Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-line me-2 text-primary"></i>12-Month Financial Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendsChart" height="120"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-pie me-2 text-warning"></i>Expense Categories
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="categoryChart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Balances & Category Breakdown Tables -->
+    <div class="row">
+        <!-- Account Balances -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-university me-2 text-success"></i>Account Balances
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Account</th>
+                                    <th>Type</th>
+                                    <th class="text-end">Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for account in account_balances %}
+                                <tr>
+                                    <td class="fw-semibold">{{ account.name }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ account.type }}</span>
+                                    </td>
+                                    <td class="text-end text-success fw-bold">
+                                        ${{ account.balance|floatformat:2 }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">
+                                        No accounts found
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown Table -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-tags me-2 text-danger"></i>Top Expense Categories
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th class="text-center">Transactions</th>
+                                    <th class="text-end">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for category in category_breakdown %}
+                                <tr>
+                                    <td class="fw-semibold">{{ category.category__name }}</td>
+                                    <td class="text-center">
+                                        <span class="badge bg-info">{{ category.count }}</span>
+                                    </td>
+                                    <td class="text-end text-danger fw-bold">
+                                        ${{ category.total|floatformat:2 }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-3">
+                                        No expense categories found
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Data -->
+<script id="monthly-trends-data" type="application/json">
+{{ monthly_trends|safe }}
+</script>
+
+<script id="category-data" type="application/json">
+{
+    "labels": [{% for cat in category_breakdown %}"{{ cat.category__name }}"{% if not forloop.last %},{% endif %}{% endfor %}],
+    "data": [{% for cat in category_breakdown %}{{ cat.total }}{% if not forloop.last %},{% endif %}{% endfor %}]
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'accounts/js/reports.js' %}"></script>
+{% endblock %}
