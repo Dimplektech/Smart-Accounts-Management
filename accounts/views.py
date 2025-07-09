@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
@@ -8,7 +8,7 @@ from django.db.models import Count, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
 from .models import Transaction, Account, Category, Budget
-from .forms import TransactionForm, AccountForm, BudgetForm
+from .forms import TransactionForm, AccountForm, BudgetForm, RegistrationForm
 
 
 def create_default_data(user):
@@ -113,7 +113,6 @@ def create_default_data(user):
             "account_number": "****0001",
             "initial_balance": 0.00,
             "balance": 0.00,
-            "description": "Your primary checking account",
             "is_active": True,
         },
     )
@@ -309,7 +308,7 @@ def transaction_list_view(request):
 @login_required
 def add_transaction_view(request):
     if request.method == "POST":
-        form = TransactionForm(request.POST, request.user)
+        form = TransactionForm(request.POST, user=request.user)
         if form.is_valid():
             transaction = form.save(commit=False)
             transaction.user = request.user
@@ -325,10 +324,13 @@ def add_transaction_view(request):
 
             messages.success(
                 request,
-                "Transaction added successfully! ${transaction.amount} {transaction.transaction_type} to {account.name}.",
+                f"Transaction added successfully! ${transaction.amount} {transaction.transaction_type} to {account.name}.",
             )
+            return redirect("accounts:dashboard")  # Add redirect after successful save
+        else:
+            messages.error(request, "Please correct the errors below.")
     else:
-        form = TransactionForm(request.user)
+        form = TransactionForm(user=request.user)
 
     return render(request, "accounts/add_transaction.html", {"form": form})
 
@@ -341,7 +343,7 @@ def account_list_view(request):
 
 def register_view(request):
     if request.method == "POST":
-        form = UserCreationForm(request.POST)
+        form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save()
             username = form.cleaned_data.get("username")
@@ -349,15 +351,21 @@ def register_view(request):
             # Create default financial data for new user
             create_default_data(user)
 
-            # Optional: Auto-login the user
+            # Auto-login the user
             login(request, user)
 
             messages.success(
                 request, f"Welcome {username}! Your account has been created."
             )
             return redirect("accounts:dashboard")
+        else:
+            # Debug: Show specific form errors
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{field}: {error}")
+            messages.error(request, 'Please correct the errors below.')
     else:
-        form = UserCreationForm()
+        form = RegistrationForm()
 
     return render(request, "accounts/register.html", {"form": form})
 
@@ -401,27 +409,26 @@ def add_budget_view(request):
 
 @login_required
 def add_account(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = AccountForm(request.POST, user=request.user)
         if form.is_valid():
             account = form.save(commit=False)
             account.user = request.user
             account.save()
-            
+
             messages.success(
-                request, 
-                f'Account "{account.name}" created successfully with account number {account.account_number}!'
+                request,
+                f'Account "{account.name}" created successfully with account number {account.account_number}!',
             )
-            return redirect('accounts:account_list')  # or wherever you want to redirect
+            return redirect("accounts:account_list")  # or wherever you want to redirect
         else:
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, "Please correct the errors below.")
     else:
         form = AccountForm(user=request.user)
-    
-    return render(request, 'accounts/add_account.html', {
-        'form': form,
-        'title': 'Add New Account'
-    })
+
+    return render(
+        request, "accounts/add_account.html", {"form": form, "title": "Add New Account"}
+    )
 
 
 @login_required

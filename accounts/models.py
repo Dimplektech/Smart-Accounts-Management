@@ -1,6 +1,7 @@
 from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
 
 
 # Create your models here.
@@ -35,7 +36,7 @@ class Account(models.Model):
         AccountType, on_delete=models.CASCADE, related_name="accounts_type"
     )
     name = models.CharField(max_length=100)
-    account_number = models.CharField(max_length=20, unique=True, blank=True)
+    account_number = models.CharField(max_length=20, unique=True, blank=True,null=True,help_text="Optional: Enter your bank account number for reference")
     balance = models.DecimalField(
         max_digits=15, decimal_places=2, default=Decimal("0.00")
     )
@@ -79,6 +80,14 @@ class Account(models.Model):
         )
         self.save()
 
+    def save(self, *args, **kwargs):
+        # When creating a new account, set balance to initial_balance
+        if not self.pk:  # New account (no primary key yet)
+            self.balance = self.initial_balance
+        
+        super().save(*args, **kwargs)
+    
+    
 
 class Category_type(models.Model):
     CATEGORY_TYPES = [

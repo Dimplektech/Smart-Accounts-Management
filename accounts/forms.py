@@ -2,6 +2,7 @@
 from django import forms
 from .models import Account, Transaction, Category, Budget, AccountType, Category_type
 from decimal import Decimal
+from django.contrib.auth.models import User
 
 class TransactionForm(forms.ModelForm):
     class Meta:
@@ -96,7 +97,7 @@ class AccountForm(forms.ModelForm):
             }),
             'account_number': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'e.g., 1234567890 (optional - will auto-generate if empty)'
+                'placeholder': 'e.g., 1234567890'
             }),
             'initial_balance': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -125,7 +126,7 @@ class AccountForm(forms.ModelForm):
         self.fields['name'].required = True
         self.fields['account_type'].required = True
         self.fields['initial_balance'].required = True
-        self.fields['account_number'].required = False  
+        self.fields['account_number'].help_text = "optional: Enter your bank account number for reference"
         self.fields['bank_name'].required = False
         
         # Filter account types to only active ones
@@ -333,6 +334,12 @@ class RegistrationForm(forms.Form):
         label='Confirm Password'
     )
 
+    def clean_password1(self):
+        password1 = self.cleaned_data.get('password1')
+        if password1 and len(password1) < 8:
+            raise forms.ValidationError("Password must be at least 8 characters long.")
+        return password1
+
     def clean_password2(self):
         password1 = self.cleaned_data.get('password1')
         password2 = self.cleaned_data.get('password2')
@@ -341,3 +348,26 @@ class RegistrationForm(forms.Form):
             raise forms.ValidationError("Passwords don't match.")
         
         return password2
+    
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Username already exists.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already exists.")
+        return email
+
+    def save(self):
+        # Create the user
+        user = User.objects.create_user(
+            username=self.cleaned_data['username'],
+            email=self.cleaned_data['email'],
+            password=self.cleaned_data['password1'],
+            first_name=self.cleaned_data['first_name'],
+            last_name=self.cleaned_data['last_name']
+        )
+        return user
