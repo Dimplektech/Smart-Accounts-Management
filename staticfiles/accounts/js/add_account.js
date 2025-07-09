@@ -1,6 +1,47 @@
 // accounts/static/accounts/js/add_account.js
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Form preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('accountForm');
+    const formSummary = document.getElementById('formSummary');
+    const nameField = document.getElementById('{{ form.name.id_for_label }}');
+    const typeField = document.getElementById('{{ form.account_type.id_for_label }}');
+    const balanceField = document.getElementById('{{ form.initial_balance.id_for_label }}');
+    const bankField = document.getElementById('{{ form.bank_name.id_for_label }}');
+
+    function updatePreview() {
+        document.getElementById('summaryName').textContent = nameField.value || '-';
+        document.getElementById('summaryType').textContent = typeField.options[typeField.selectedIndex].text || '-';
+        document.getElementById('summaryBalance').textContent = balanceField.value ? `£${parseFloat(balanceField.value).toFixed(2)}` : '£0.00';
+        document.getElementById('summaryBank').textContent = bankField.value || '-';
+        
+        // Show summary if any field has value
+        if (nameField.value || typeField.value || balanceField.value || bankField.value) {
+            formSummary.style.display = 'block';
+        } else {
+            formSummary.style.display = 'none';
+        }
+    }
+
+    // Add event listeners
+    [nameField, typeField, balanceField, bankField].forEach(field => {
+        if (field) {
+            field.addEventListener('input', updatePreview);
+            field.addEventListener('change', updatePreview);
+        }
+    });
+});
+
+// Reset form function
+function resetAccountForm() {
+    document.getElementById('accountForm').reset();
+    document.getElementById('formSummary').style.display = 'none';
+    
+    // Clear any error messages
+    document.querySelectorAll('.text-danger').forEach(el => el.style.display = 'none');
+}
+
     console.log('🏦 Account Form Loading...');
     
     initializeAccountForm();

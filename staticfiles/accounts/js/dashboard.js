@@ -103,44 +103,83 @@ function initializeMonthlyChart() {
     const ctx = document.getElementById('monthlyChart');
     if (!ctx) return;
     
-    // Sample data - replace with your actual data
-    const monthlyData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-        datasets: [
-            {
-                label: 'Income',
-                data: [3200, 3400, 2800, 3600, 3800, 4200],
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#10b981',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8
-            },
-            {
-                label: 'Expenses',
-                data: [2800, 2900, 2400, 3100, 3200, 3500],
-                borderColor: '#ef4444',
-                backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                borderWidth: 3,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#ef4444',
-                pointBorderColor: '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8
-            }
-        ]
-    };
+    // Use real data from Django backend or fallback to sample data
+    let chartData;
+    if (window.dashboardData && window.dashboardData.monthlyData && window.dashboardData.monthlyData.length > 0) {
+        const realData = window.dashboardData.monthlyData;
+        chartData = {
+            labels: realData.map(item => item.month),
+            datasets: [
+                {
+                    label: 'Income',
+                    data: realData.map(item => item.income),
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Expenses',
+                    data: realData.map(item => item.expenses),
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }
+            ]
+        };
+    } else {
+        // Fallback to sample data if no real data available
+        chartData = {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [
+                {
+                    label: 'Income',
+                    data: [0, 0, 0, 0, 0, 0],
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#10b981',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                },
+                {
+                    label: 'Expenses',
+                    data: [0, 0, 0, 0, 0, 0],
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#ef4444',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }
+            ]
+        };
+    }
     
     new Chart(ctx, {
         type: 'line',
-        data: monthlyData,
+        data: chartData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -219,27 +258,41 @@ function initializeCategoryChart() {
     const ctx = document.getElementById('categoryChart');
     if (!ctx) return;
     
-    // Sample data - replace with your actual data
-    const categoryData = {
-        labels: ['Food & Dining', 'Transportation', 'Shopping', 'Entertainment', 'Bills & Utilities'],
-        datasets: [{
-            data: [1200, 800, 600, 400, 300],
-            backgroundColor: [
-                '#ef4444',
-                '#f59e0b',
-                '#10b981',
-                '#06b6d4',
-                '#8b5cf6'
-            ],
-            borderWidth: 0,
-            hoverBorderWidth: 3,
-            hoverBorderColor: '#ffffff'
-        }]
-    };
+    // Use real data from Django backend or fallback to sample data
+    let chartData;
+    if (window.dashboardData && window.dashboardData.categorySpending && window.dashboardData.categorySpending.length > 0) {
+        const realData = window.dashboardData.categorySpending;
+        const colors = [
+            '#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6', '#ec4899', '#f97316', '#84cc16'
+        ];
+        
+        chartData = {
+            labels: realData.map(item => item.category__name),
+            datasets: [{
+                data: realData.map(item => item.total),
+                backgroundColor: colors.slice(0, realData.length),
+                borderWidth: 0,
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#ffffff'
+            }]
+        };
+    } else {
+        // Fallback to sample data if no real data available
+        chartData = {
+            labels: ['No Expenses Yet'],
+            datasets: [{
+                data: [1],
+                backgroundColor: ['#e5e7eb'],
+                borderWidth: 0,
+                hoverBorderWidth: 3,
+                hoverBorderColor: '#ffffff'
+            }]
+        };
+    }
     
     new Chart(ctx, {
         type: 'doughnut',
-        data: categoryData,
+        data: chartData,
         options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -265,6 +318,9 @@ function initializeCategoryChart() {
                     cornerRadius: 8,
                     callbacks: {
                         label: function(context) {
+                            if (context.label === 'No Expenses Yet') {
+                                return 'No expenses recorded yet';
+                            }
                             const total = context.dataset.data.reduce((a, b) => a + b, 0);
                             const percentage = ((context.parsed / total) * 100).toFixed(1);
                             return `${context.label}: $${context.parsed.toLocaleString()} (${percentage}%)`;

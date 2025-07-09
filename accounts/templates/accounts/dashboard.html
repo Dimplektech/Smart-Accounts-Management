@@ -276,5 +276,21 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{% static 'accounts/js/dashboard.js' %}"></script>
+<script>
+// Debug: Log user and data
+console.log('🔍 Dashboard data for user:', '{{ user.username }}');
+console.log('🔍 Monthly data:', {{ monthly_data_json|safe }});
+console.log('🔍 Category spending:', {{ category_spending_json|safe }});
+
+// Pass Django data to JavaScript with user identification
+window.dashboardData = {
+    user: '{{ user.username }}',
+    userId: {{ user.id }},
+    monthlyData: {{ monthly_data_json|safe }},
+    categorySpending: {{ category_spending_json|safe }},
+    accountDistribution: {{ account_distribution_json|safe }},
+    timestamp: new Date().getTime() // Prevent caching
+};
+</script>
+<script src="{% static 'accounts/js/dashboard.js' %}?v={{ user.id }}-{{ current_month }}"></script>
 {% endblock %}
