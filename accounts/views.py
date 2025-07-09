@@ -41,6 +41,7 @@ def dashboard_view(request):
 
     # Calculate total balance across all accounts
     total_balance = user_accounts.aggregate(total=Sum("balance"))["total"] or 0
+    total_balance = float(total_balance) if total_balance else 0.0
     # For now, just render the dashboard template
 
     # Get current months date range
@@ -64,6 +65,7 @@ def dashboard_view(request):
         )["total"]
         or 0
     )
+    monthly_income = float(monthly_income) if monthly_income else 0.0
 
     monthly_expenses = (
         current_month_transactions.filter(transaction_type="expense").aggregate(
@@ -71,17 +73,28 @@ def dashboard_view(request):
         )["total"]
         or 0
     )
+    monthly_expenses = float(monthly_expenses) if monthly_expenses else 0.0
 
     # Get recent transactions (last 10)
     recent_transactions = current_month_transactions.order_by("-date")[:10]
 
     # Chart data: Get Spending by Category for chart
-    category_spending = (
+    category_spending_raw = (
         current_month_transactions.filter(transaction_type="expense")
         .values("category__name")
         .annotate(total=Sum("amount"))
         .order_by("-total")[:6]
     )
+
+    # Convert Decimal values to float for JSON serialization
+    category_spending = []
+    for item in category_spending_raw:
+        category_spending.append(
+            {
+                "category__name": item["category__name"],
+                "total": float(item["total"]) if item["total"] else 0.0,
+            }
+        )
 
     # Chart Data: Monthly Income vs Expenses (last 6 months)
     monthly_data = []
@@ -170,12 +183,12 @@ def dashboard_view(request):
         "total_transactions": total_transactions,
         "current_month": current_month.strftime("%B %Y"),
         # Chart data
-        "category_spending": list(category_spending),
+        "category_spending": category_spending,
         "monthly_data": monthly_data,
         "account_distribution": account_distribution,
         # JSON serialized data for JavaScript
         "monthly_data_json": json.dumps(monthly_data),
-        "category_spending_json": json.dumps(list(category_spending)),
+        "category_spending_json": json.dumps(category_spending),
         "account_distribution_json": json.dumps(account_distribution),
     }
 
@@ -215,20 +228,32 @@ def transaction_list_view(request):
 
 @login_required
 def add_transaction_view(request):
+    print(f"🔍 Add transaction view called for user: {request.user.username}")
+
     if request.method == "POST":
+        print(f"🔍 POST data: {request.POST}")
         form = TransactionForm(request.POST, user=request.user)
+
         if form.is_valid():
+            print("🔍 Form is valid, saving transaction...")
             transaction = form.save(commit=False)
             transaction.user = request.user
             transaction.save()
+            print(f"🔍 Transaction saved: {transaction}")
 
             # Update account balance
             account = transaction.account
+            print(
+                f"🔍 Updating account balance for {account.name}, current balance: {account.balance}"
+            )
+
             if transaction.transaction_type == "income":
                 account.balance += transaction.amount
             elif transaction.transaction_type == "expense":
                 account.balance -= transaction.amount
             account.save()
+
+            print(f"🔍 Account balance updated to: {account.balance}")
 
             messages.success(
                 request,
@@ -236,9 +261,18 @@ def add_transaction_view(request):
             )
             return redirect("accounts:dashboard")  # Add redirect after successful save
         else:
+            print(f"🔍 Form validation failed: {form.errors}")
             messages.error(request, "Please correct the errors below.")
     else:
+        print("🔍 GET request, creating new form")
         form = TransactionForm(user=request.user)
+
+    # Debug: Check if user has accounts and categories
+    user_accounts = Account.objects.filter(user=request.user, is_active=True)
+    user_categories = Category.objects.filter(user=request.user)
+    print(
+        f"🔍 User has {user_accounts.count()} accounts and {user_categories.count()} categories"
+    )
 
     return render(request, "accounts/add_transaction.html", {"form": form})
 
@@ -246,7 +280,7 @@ def add_transaction_view(request):
 @login_required
 def account_list_view(request):
     accounts = Account.objects.filter(user=request.user, is_active=True)
-    return render(request, "accounts/accounts.html", {"accounts": accounts})
+    return render(request, "accounts/account_list.html", {"accounts": accounts})
 
 
 def register_view(request):
@@ -313,7 +347,9 @@ def add_budget_view(request):
             messages.success(request, f"Budget {budget.name} created successfully!")
             return redirect("accounts:budget_list")
         else:
-            form = BudgetForm(request.user)
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = BudgetForm(request.user)
 
     return render(request, "accounts/add_budget.html", {"form": form})
 

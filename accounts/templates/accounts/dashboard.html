@@ -150,11 +150,12 @@
             <div class="account-item">
               <div class="account-info">
                 <div class="account-icon">
-                  {% if account.account_type == 'checking' %}🏦 {% elif
-                  account.account_type == 'savings' %}💰 {% elif
-                  account.account_type == 'credit' %}💳 {% elif
-                  account.account_type == 'investment' %}📈 {% else %}🏛️{% endif
-                  %}
+                  {% if account.account_type.name == 'Checking' %}🏦
+                  {% elif account.account_type.name == 'Savings' %}💰
+                  {% elif account.account_type.name == 'Credit Card' %}💳
+                  {% elif account.account_type.name == 'Investment' %}📈
+                  {% else %}🏛️
+                  {% endif %}
                 </div>
                 <div class="account-details">
                   <div class="account-name">{{ account.name }}</div>
@@ -206,9 +207,7 @@
               <div
                 class="transaction-icon transaction-{{ transaction.transaction_type }}"
               >
-                {% if transaction.transaction_type == 'income' %}💰 {% elif
-                transaction.transaction_type == 'expense' %}💸 {% else %}🔄{%
-                endif %}
+                {% if transaction.transaction_type == 'income' %}💰 {% elif transaction.transaction_type == 'expense' %}💸 {% else %}🔄{% endif %}
               </div>
               <div class="transaction-details">
                 <div class="transaction-description">
@@ -226,8 +225,7 @@
               <div
                 class="transaction-amount transaction-{{ transaction.transaction_type }}"
               >
-                {% if transaction.transaction_type == 'expense' %}-{% endif
-                %}${{ transaction.amount|floatformat:2 }}
+                {% if transaction.transaction_type == 'expense' %}-{% endif %}${{ transaction.amount|floatformat:2 }}
               </div>
             </div>
             {% empty %}
