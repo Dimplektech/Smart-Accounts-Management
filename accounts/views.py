@@ -31,8 +31,10 @@ def login_view(request):
 @login_required
 def dashboard_view(request):
     # Debug: Print current user
-    print(f"🔍 Dashboard view for user: {request.user.username} (ID: {request.user.id})")
-    
+    print(
+        f"🔍 Dashboard view for user: {request.user.username} (ID: {request.user.id})"
+    )
+
     # Get current user's Accounts
     user_accounts = Account.objects.filter(user=request.user, is_active=True)
     print(f"🔍 User has {user_accounts.count()} accounts")
@@ -95,12 +97,11 @@ def dashboard_view(request):
             if month <= 0:
                 month += 12
                 year -= 1
-            
+
             month_start = timezone.now().replace(
-                year=year, month=month, day=1,
-                hour=0, minute=0, second=0, microsecond=0
+                year=year, month=month, day=1, hour=0, minute=0, second=0, microsecond=0
             )
-            
+
             # Calculate end of this month
             if month == 12:
                 month_end = month_start.replace(year=year + 1, month=1)
@@ -132,7 +133,9 @@ def dashboard_view(request):
                 "expenses": float(month_expenses),
             }
         )
-        print(f"🔍 {month_start.strftime('%b %Y')}: Income=${month_income}, Expenses=${month_expenses}")
+        print(
+            f"🔍 {month_start.strftime('%b %Y')}: Income=${month_income}, Expenses=${month_expenses}"
+        )
 
     monthly_data.reverse()  # Show oldest to newest
     print(f"🔍 Final monthly_data for {request.user.username}: {monthly_data}")
@@ -257,10 +260,10 @@ def register_view(request):
                 # Don't auto-login - redirect to login page instead
                 messages.success(
                     request,
-                    f"Welcome {username}! Your account has been created successfully. Please login to continue."
+                    f"Welcome {username}! Your account has been created successfully. Please login to continue.",
                 )
                 return redirect("accounts:login")
-                
+
             except Exception as e:
                 print(f"❌ Error during user creation: {e}")
                 messages.error(request, f"Error creating user: {e}")
@@ -271,7 +274,7 @@ def register_view(request):
                 for error in errors:
                     print(f"  - {field}: {error}")
                     messages.error(request, f"{field}: {error}")
-            messages.error(request, 'Please correct the errors below.')
+            messages.error(request, "Please correct the errors below.")
     else:
         form = RegistrationForm()
 
