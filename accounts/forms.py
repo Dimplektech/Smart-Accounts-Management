@@ -63,14 +63,12 @@ class TransactionForm(forms.ModelForm):
         if not self.instance.pk:  # Only for new transactions
             from django.utils import timezone
             self.fields['date'].initial = timezone.now()
-            # Set default payment method to cash for new transactions
-            self.fields['payment_methods'].initial = 'cash'
         
         # Set empty labels
         self.fields['transaction_type'].empty_label = "-- Select Type --"
         self.fields['account'].empty_label = "-- Select Account --"
         self.fields['category'].empty_label = "-- Select Category --"
-        # No empty_label for payment_methods since it has a default value
+        self.fields['payment_methods'].empty_label = "-- Select Payment Method --"
     
     def clean_amount(self):
         amount = self.cleaned_data.get('amount')

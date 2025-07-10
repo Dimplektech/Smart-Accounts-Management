@@ -300,6 +300,8 @@ main {
     }
 }
 
+/* Alert Variants */
+
 .alert-success {
     background-color: #f0fdf4;
     color: #166534;
@@ -332,6 +334,37 @@ main {
 
 .alert-dismissible .btn-close:hover {
     opacity: 1;
+}
+
+/* Custom Toast Backgrounds for Django Messages */
+.text-bg-success {
+  background-color: #198754 !important;
+  color: #fff !important;
+}
+.text-bg-error, .text-bg-danger {
+  background-color: #dc3545 !important;
+  color: #fff !important;
+}
+.text-bg-warning {
+  background-color: #ffc107 !important;
+  color: #212529 !important;
+}
+.text-bg-info {
+  background-color: #0dcaf0 !important;
+  color: #212529 !important;
+}
+.text-bg-debug {
+  background-color: #6c757d !important;
+  color: #fff !important;
+}
+.text-bg-default {
+  background-color: #343a40 !important;
+  color: #fff !important;
+}
+
+/* Toast close button color fix for all backgrounds */
+.toast .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
 }
 
 /* ===================================

@@ -156,35 +156,6 @@
                                            required>
                                 </div>
 
-                                <!-- Payment Method -->
-                                <div class="col-md-6 mb-3">
-                                    <label for="{{ form.payment_methods.id_for_label }}" class="form-label">
-                                        <i class="fas fa-credit-card me-1"></i>Payment Method
-                                    </label>
-                                    <select name="{{ form.payment_methods.name }}" id="{{ form.payment_methods.id_for_label }}" class="form-select">
-                                        <option value="cash" {% if form.payment_methods.value == 'cash' %}selected{% endif %}>
-                                            💵 Cash
-                                        </option>
-                                        <option value="card" {% if form.payment_methods.value == 'card' %}selected{% endif %}>
-                                            💳 Card
-                                        </option>
-                                        <option value="bank_transfer" {% if form.payment_methods.value == 'bank_transfer' %}selected{% endif %}>
-                                            🏦 Bank Transfer
-                                        </option>
-                                        <option value="online" {% if form.payment_methods.value == 'online' %}selected{% endif %}>
-                                            💻 Online Payment
-                                        </option>
-                                        <option value="check" {% if form.payment_methods.value == 'check' %}selected{% endif %}>
-                                            📝 Check
-                                        </option>
-                                        <option value="other" {% if form.payment_methods.value == 'other' %}selected{% endif %}>
-                                            🔧 Other
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row">
                                 <!-- Notes (optional) -->
                                 <div class="col-md-6 mb-3">
                                     <label for="notes" class="form-label">
