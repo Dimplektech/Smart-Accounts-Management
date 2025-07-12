@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 import json
 from .models import Transaction, Account, Category, Budget
 from .forms import TransactionForm, AccountForm, BudgetForm, RegistrationForm
+from datetime import date
+from django.db.models.functions import TruncMonth
 
 
 def login_view(request):
@@ -408,3 +410,89 @@ def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out.")
     return redirect("accounts:login")
+
+from datetime import datetime
+
+@login_required
+def reports_view(request):
+    # Parse dates from GET params, fallback to defaults
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+    if start_date_str:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    else:
+        start_date = date.today().replace(day=1)
+    if end_date_str:
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    else:
+        end_date = date.today()
+
+    # Get report type from query param, default to 'income_vs_expenses'
+    report_type = request.GET.get('type', 'income_vs_expenses')
+
+    income_total = Transaction.objects.filter(
+        user=request.user,
+        transaction_type='income',
+        date__gte=start_date,
+        date__lte=end_date,
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    expenses_total = Transaction.objects.filter(
+        user=request.user, 
+        transaction_type='expense',
+        date__gte=start_date,
+        date__lte=end_date,
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    net_income = income_total - expenses_total
+    transactions_count = Transaction.objects.filter(
+        user=request.user,
+        date__gte=start_date,
+        date__lte=end_date,
+    ).count()
+
+    # Convert QuerySets to lists and Decimals to float
+    account_balances = [
+        {
+            'name': a['name'],
+            'balance': float(a['balance']),
+            'account_type': a['account_type__name'],
+        }
+        for a in Account.objects.filter(user=request.user).values('name', 'balance', 'account_type__name')
+    ]
+    category_breakdown = [
+        {
+            'category': c['category__name'],
+            'total': float(c['total']),
+        }
+        for c in Transaction.objects.filter(user=request.user, date__gte=start_date, date__lte=end_date)
+            .values('category__name')
+            .annotate(total=Sum('amount'))
+            .order_by('-total')
+    ]
+   
+
+    monthly_trends = (
+        Transaction.objects.filter(user=request.user, date__gte=start_date, date__lte=end_date)
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+    monthly_trends_json = json.dumps(
+        {item['month'].strftime('%Y-%m'): float(item['total']) for item in monthly_trends}
+    )
+
+    context = {
+        "start_date": start_date,
+        "end_date": end_date,
+        'income_total': float(income_total),
+        'expenses_total': float(expenses_total),
+        'net_income': float(net_income),
+        'transactions_count': transactions_count,
+        'account_balances': account_balances,
+        'category_breakdown': category_breakdown,
+        'monthly_trends': monthly_trends_json,
+        'report_type': report_type,
+    }
+    return render(request, "accounts/reports.html", context)

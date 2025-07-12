@@ -187,17 +187,26 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
                 <li>
-                  <a class="dropdown-item" href="#" onclick="return false;">
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'accounts:reports' %}?type=income_vs_expenses"
+                  >
                     <i class="fas fa-chart-line me-2"></i>Income vs Expenses
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#" onclick="return false;">
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'accounts:reports' %}?type=monthly"
+                  >
                     <i class="fas fa-chart-bar me-2"></i>Monthly Report
                   </a>
                 </li>
                 <li>
-                  <a class="dropdown-item" href="#" onclick="return false;">
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'accounts:reports' %}?type=category_breakdown"
+                  >
                     <i class="fas fa-chart-pie me-2"></i>Category Breakdown
                   </a>
                 </li>
@@ -261,6 +270,12 @@
                   </a>
                 </li>
               </ul>
+            </li>
+              <!-- Scanner -->
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'scanner:scanner_home' %}">
+                    <i class="fas fa-camera me-1"></i>Scanner
+                </a>
             </li>
           </ul>
 
@@ -356,8 +371,8 @@
               >
                 <i class="fas fa-user me-1"></i>
                 {% if user.first_name and user.first_name|length > 0 %}{{
-                user.first_name }}{% elif user.username %}{{ user.username }}{%
-                else %}<span style="color: red">NO USERNAME</span>{% endif %}
+                user.first_name }}{% elif user.username %}{{ user.username }}
+                else %}{% endif %}
               </a>
               <ul
                 class="dropdown-menu dropdown-menu-end"
@@ -399,6 +414,8 @@
                     Support</a
                   >
                 </li>
+              
+
                 <li>
                   <a class="dropdown-item" href="{% url 'accounts:logout' %}"
                     ><i class="fas fa-sign-out-alt me-2"></i>Logout</a
@@ -417,6 +434,7 @@
                 ><i class="fas fa-user-plus me-1"></i>Register</a
               >
             </li>
+           
             {% endif %}
           </ul>
         </div>

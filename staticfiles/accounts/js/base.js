@@ -14,6 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
     toastElList.forEach(function (toastEl) {
       var toast = new bootstrap.Toast(toastEl);
       toast.show();
+    });
+
+    // Global utility functions
+    window.showGlobalNotification = showGlobalNotification;
+    window.showKeyboardShortcutsHelp = showKeyboardShortcutsHelp;
+
+    console.log('🚀 Base JavaScript Loaded');
+    console.log('Keyboard Shortcuts: Alt+D (Dashboard), Alt+T (Transaction), Alt+A (Account), Ctrl+/ (Help)');
 });
 
 function initializeBaseComponents() {
@@ -384,10 +392,4 @@ function closeAllDropdowns(except = null) {
             }
         }
     });
-
-// Global utility functions
-window.showGlobalNotification = showGlobalNotification;
-window.showKeyboardShortcutsHelp = showKeyboardShortcutsHelp;
-
-console.log('🚀 Base JavaScript Loaded');
-console.log('Keyboard Shortcuts: Alt+D (Dashboard), Alt+T (Transaction), Alt+A (Account), Ctrl+/ (Help)');
+}

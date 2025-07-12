@@ -25,4 +25,7 @@ urlpatterns = [
     # Budget URLs
     path('budgets/', views.budget_list_view, name='budget_list'),
     path('add-budget/', views.add_budget_view, name='add_budget'),
+
+    # Reports URLs
+    path('reports/', views.reports_view, name='reports'),
 ]
