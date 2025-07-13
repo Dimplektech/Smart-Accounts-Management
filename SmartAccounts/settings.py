@@ -27,7 +27,7 @@ SECRET_KEY = config("SECRET_KEY", default="django-insecure-temp-key-for-build")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = ['.herokuapp.com', 'localhost',]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
