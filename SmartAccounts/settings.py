@@ -23,10 +23,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-temp-key-for-build')
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=False, cast=bool)
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['*']
 
@@ -100,12 +100,12 @@ else:
     # Local development database
     DATABASES = {
         "default": {
-            "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql_psycopg2"),
-            "NAME": config("DB_NAME", default="smartaccounts"),
-            "USER": config("DB_USER", default="postgres"),
-            "PASSWORD": config("DB_PASSWORD", default=""),
-            "HOST": config("DB_HOST", default="localhost"),
-            "PORT": config("DB_PORT", default="5432"),
+            "ENGINE": os.environ.get("DB_ENGINE", default="django.db.backends.postgresql_psycopg2"),
+            "NAME": os.environ.get("DB_NAME", default="smartaccounts"),
+            "USER": os.environ.get("DB_USER", default="postgres"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", default=""),
+            "HOST": os.environ.get("DB_HOST", default="localhost"),
+            "PORT": os.environ.get("DB_PORT", default="5432"),
         }
     }
 
