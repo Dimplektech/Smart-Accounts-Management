@@ -88,16 +88,26 @@ WSGI_APPLICATION = "SmartAccounts.wsgi.application"
 # SmartAccounts/settings.py
 
 # Configuration for PostgreSQL database
-DATABASES = {
-    "default": {
-        "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql_psycopg2"),
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST", default="localhost"),
-        "PORT": config("DB_PORT", default="5432"),
+
+# Database Configuration - FIXED FOR HEROKU
+if 'DATABASE_URL' in os.environ:
+    # Heroku PostgreSQL database
+    DATABASES = {
+        'default': dj_database_url.parse(os.environ['DATABASE_URL'])
     }
-}
+else:
+    # Local development database
+    DATABASES = {
+        "default": {
+            "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql_psycopg2"),
+            "NAME": config("DB_NAME", default="smartaccounts"),
+            "USER": config("DB_USER", default="postgres"),
+            "PASSWORD": config("DB_PASSWORD", default=""),
+            "HOST": config("DB_HOST", default="localhost"),
+            "PORT": config("DB_PORT", default="5432"),
+        }
+    }
+
 
 
 # Password validation
