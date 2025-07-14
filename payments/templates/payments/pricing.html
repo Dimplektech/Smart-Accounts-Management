@@ -1,18 +1,44 @@
 {% extends 'accounts/base.html' %} 
 {% load static %}
-
-{% block title %}Pricing Plans - Smart Account Management{% endblock %} 
-
-{% block main_class %}{% endblock %}
-
+{% block title %}Pricing Plans - Smart Account Management{% endblock %}
+{% block main_class %}{% endblock%}
 {% block extra_head %}
-<script src="https://js.stripe.com/v3/"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+{% block extra_css %}
 <style>
-  /* Override body styles only for this page */
+  /* Strong overrides for this page */
+  html,
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background-color: transparent !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Override main container styles */
+  body > main,
+  main.container-fluid,
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    max-width: none !important;
+  }
+
+  /* Ensure navbar doesn't interfere */
+  .navbar {
+    position: relative !important;
+    z-index: 1000 !important;
+  }
+
   .pricing-page-wrapper {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 2rem 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    min-height: 100vh !important;
+    padding: 2rem 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
   }
 
   .pricing-container {
@@ -26,7 +52,7 @@
     opacity: 1;
     transform: translateY(0);
   }
-  
+
   /* Reset any potential conflicts */
   .pricing-page-wrapper * {
     box-sizing: border-box;
@@ -128,8 +154,8 @@
   }
 
   .price-highlight {
-    font-size: 3.5rem;
-    font-weight: 900;
+    font-size: 2.5rem;
+    font-weight: 600;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     background-clip: text;
@@ -303,7 +329,6 @@
   }
 </style>
 {% endblock %}
-
 {% block content %}
 <div class="pricing-page-wrapper">
   <div class="container">
@@ -328,7 +353,7 @@
             {% endif %}
 
             <div class="card-header text-center text-white">
-              <h3 class="plan-name">{{ plan.name }}</h3>
+              <h4 class="plan-name">{{ plan.name }}</h4>
             </div>
 
             <div class="card-body text-center">
@@ -352,8 +377,9 @@
                 data-price="{{ plan.price }}"
                 data-stripe-price-id="{{ plan.stripe_price_id }}"
               >
-                {% if plan.price == 0 %} Get Started Free {% else %} Choose {{
-                plan.name }} {% endif %}
+                {% if plan.price == 0 %} Get Started Free {% else %}
+                 Choose Premium
+                {% endif %}
               </button>
             </div>
           </div>

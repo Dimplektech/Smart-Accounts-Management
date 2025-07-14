@@ -1,8 +1,8 @@
 import stripe
 import json
 from django.conf import settings
-from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -22,6 +22,7 @@ def user_has_premium(user):
 
 @login_required
 def pricing_page(request):
+    print("DEBUG: pricing_page view called!")  # Debug print
     """Display simple pricing plans"""
     plans = [
         {
@@ -98,6 +99,7 @@ def create_payment_intent(request):
 def payment_success(request):
     """Handle successful payment"""
     payment_intent_id = request.GET.get("payment_intent")
+    feature_type = request.GET.get("feature_type")
 
     if payment_intent_id:
         try:
@@ -105,12 +107,31 @@ def payment_success(request):
             payment.status = "completed"
             payment.save()
 
-            # If it's a premium upgrade, no need for additional features
-            # The payment record itself indicates premium access
+            # If it's a premium feature purchase, create the feature record
+            if payment.payment_type == "premium_feature" and feature_type:
+                # Create or update the premium feature for the user
+                premium_feature, created = PremiumFeature.objects.get_or_create(
+                    user=request.user,
+                    feature=feature_type,
+                    defaults={"payment": payment, "is_active": True},
+                )
 
-            messages.success(
-                request, "Payment completed successfully! You now have premium access!"
-            )
+                if not created:
+                    # If feature already exists, update it
+                    premium_feature.is_active = True
+                    premium_feature.payment = payment
+                    premium_feature.save()
+
+                messages.success(
+                    request,
+                    f"Payment completed successfully! You now have access to {premium_feature.get_feature_display()}!",
+                )
+            else:
+                # Regular premium upgrade
+                messages.success(
+                    request,
+                    "Payment completed successfully! You now have premium access!",
+                )
 
         except Payment.DoesNotExist:
             messages.error(request, "Payment not found.")
@@ -169,34 +190,76 @@ def stripe_webhook(request):
 
 @login_required
 def premium_features(request):
-    """Display simple premium upgrade"""
-    # Check if user already has premium
-    has_premium = Payment.objects.filter(
-        user=request.user, status="completed", payment_type="premium_upgrade"
-    ).exists()
+    try:
+        print("DEBUG: premium_features view called!")  # Debug print (top)
+        # Define available premium features (catalog)
+        available_features = [
+            {
+                "name": "Advanced OCR Processing",
+                "description": (
+                    "Enhanced text recognition with 99% accuracy "
+                    "for all receipt types"
+                ),
+                "price": 4.99,
+                "feature_type": "advanced_ocr",
+            },
+            {
+                "name": "Bulk Receipt Upload",
+                "description": (
+                    "Upload multiple receipts at once with " "batch processing"
+                ),
+                "price": 3.99,
+                "feature_type": "bulk_upload",
+            },
+            {
+                "name": "Advanced Expense Analytics",
+                "description": (
+                    "Detailed insights and reports on your " "spending patterns"
+                ),
+                "price": 5.99,
+                "feature_type": "expense_analytics",
+            },
+            {
+                "name": "Data Export Features",
+                "description": ("Export your data to PDF, Excel, and " "CSV formats"),
+                "price": 2.99,
+                "feature_type": "export_data",
+            },
+            {
+                "name": "Priority Customer Support",
+                "description": ("Get priority support with faster response " "times"),
+                "price": 1.99,
+                "feature_type": "priority_support",
+            },
+        ]
 
-    upgrade_info = {
-        "name": "Premium Upgrade",
-        "price": 9.99,
-        "description": "Unlock all premium features for lifetime access",
-        "features": [
-            "Unlimited Receipt Scanning",
-            "Advanced OCR Processing",
-            "Expense Analytics Dashboard",
-            "Export Data (PDF, Excel)",
-            "Priority Support",
-        ],
-        "has_premium": has_premium,
-    }
+        # Get user's purchased features
+        user_features = PremiumFeature.objects.filter(
+            user=request.user, is_active=True
+        ).values_list("feature", flat=True)
 
-    return render(
-        request,
-        "payments/simple_premium.html",
-        {
-            "upgrade": upgrade_info,
-            "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
-        },
-    )
+        print(f"Features: {len(available_features)}")  # Debug print
+        print(f"User features: {list(user_features)}")  # Debug print
+
+        return render(
+            request,
+            "payments/premium_features_test.html",
+            {
+                "features": available_features,
+                "user_features": list(user_features),
+                "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY,
+            },
+        )
+    except Exception as e:
+        import traceback
+
+        print("EXCEPTION in premium_features view:", e)
+        traceback.print_exc()
+        return render(
+            request,
+            "payments/premium_features_test.html",
+            {"features": [], "user_features": [], "stripe_publishable_key": ""},
+        )
 
 
 @login_required

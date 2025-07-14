@@ -15,6 +15,7 @@ from django.db.models.functions import TruncMonth
 
 
 def login_view(request):
+    print("DEBUG: login_view called!")  # Debug print
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
