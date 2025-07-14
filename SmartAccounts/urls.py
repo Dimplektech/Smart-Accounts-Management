@@ -23,6 +23,7 @@ urlpatterns = [
     path('', include('accounts.urls')),  # Include the accounts app URLs
     path('admin/', admin.site.urls),
     path('scanner/', include('scanner.urls')),
+    path('payments/', include('payments.urls')),  # Include the payments app URLs
 ]
 
 # Serve media files during development

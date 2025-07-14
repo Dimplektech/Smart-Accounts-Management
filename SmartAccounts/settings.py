@@ -14,6 +14,7 @@ from decouple import config
 from pathlib import Path
 import os
 import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,13 +23,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-temp-key-for-build')
+SECRET_KEY = config("SECRET_KEY", default="django-insecure-temp-key-for-build")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
+DEBUG = config("DEBUG", default="True", cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -42,7 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",  # Custom app for managing accounts
     "scanner",  # Custom app for managing accounts
-    
+    "payments",  # Custom app for payment processing
 ]
 
 MIDDLEWARE = [
@@ -91,24 +92,23 @@ WSGI_APPLICATION = "SmartAccounts.wsgi.application"
 # Configuration for PostgreSQL database
 
 # Database Configuration - FIXED FOR HEROKU
-if 'DATABASE_URL' in os.environ:
+if "DATABASE_URL" in os.environ:
     # Heroku PostgreSQL database
-    DATABASES = {
-        'default': dj_database_url.parse(os.environ['DATABASE_URL'])
-    }
+    DATABASES = {"default": dj_database_url.parse(os.environ["DATABASE_URL"])}
 else:
     # Local development database
     DATABASES = {
         "default": {
-            "ENGINE": os.environ.get("DB_ENGINE", default="django.db.backends.postgresql_psycopg2"),
-            "NAME": os.environ.get("DB_NAME", default="smartaccounts"),
-            "USER": os.environ.get("DB_USER", default="postgres"),
-            "PASSWORD": os.environ.get("DB_PASSWORD", default=""),
-            "HOST": os.environ.get("DB_HOST", default="localhost"),
-            "PORT": os.environ.get("DB_PORT", default="5432"),
+            "ENGINE": config(
+                "DB_ENGINE", default="django.db.backends.postgresql_psycopg2"
+            ),
+            "NAME": config("DB_NAME", default="smartaccounts"),
+            "USER": config("DB_USER", default="postgres"),
+            "PASSWORD": config("DB_PASSWORD", default=""),
+            "HOST": config("DB_HOST", default="localhost"),
+            "PORT": config("DB_PORT", default="5432"),
         }
     }
-
 
 
 # Password validation
@@ -146,14 +146,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # WhiteNoise configuration
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # Media files (user uploads)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -162,3 +162,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Redirect all login-required redirects to /login/
 LOGIN_URL = "/login/"
+
+# Stripe Configuration
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+# STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")

@@ -271,11 +271,47 @@
                 </li>
               </ul>
             </li>
-              <!-- Scanner -->
+            <!-- Scanner -->
             <li class="nav-item">
-                <a class="nav-link" href="{% url 'scanner:scanner_home' %}">
-                    <i class="fas fa-camera me-1"></i>Scanner
-                </a>
+              <a class="nav-link" href="{% url 'scanner:scanner_home' %}">
+                <i class="fas fa-camera me-1"></i>Scanner
+              </a>
+            </li>
+
+            <!-- Payments -->
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="paymentsDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                aria-haspopup="true"
+              >
+                <i class="fas fa-credit-card me-1"></i>Payments
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="paymentsDropdown">
+                <li>
+                  <a class="dropdown-item" href="{% url 'payments:pricing' %}">
+                    <i class="fas fa-tags me-1"></i>Pricing Plans
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item"
+                    href="{% url 'payments:premium_features' %}"
+                  >
+                    <i class="fas fa-star me-1"></i>Premium Features
+                  </a>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="{% url 'payments:history' %}">
+                    <i class="fas fa-history me-1"></i>Payment History
+                  </a>
+                </li>
+              </ul>
             </li>
           </ul>
 
@@ -414,7 +450,6 @@
                     Support</a
                   >
                 </li>
-              
 
                 <li>
                   <a class="dropdown-item" href="{% url 'accounts:logout' %}"
@@ -434,7 +469,7 @@
                 ><i class="fas fa-user-plus me-1"></i>Register</a
               >
             </li>
-           
+
             {% endif %}
           </ul>
         </div>
