@@ -33,6 +33,7 @@ def pricing_page(request):
                 "Basic expense tracking",
             ],
             "is_free": True,
+            "stripe_price_id": "",  # No Stripe price for free plan
         },
         {
             "name": "Premium",
@@ -45,11 +46,12 @@ def pricing_page(request):
                 "Priority Support",
             ],
             "is_free": False,
+            "stripe_price_id": "price_premium",  # You can replace with actual Stripe price ID
         },
     ]
     return render(
         request,
-        "payments/simple_pricing.html",
+        "payments/pricing.html",  # Changed from simple_pricing.html to pricing.html
         {"plans": plans, "stripe_publishable_key": settings.STRIPE_PUBLISHABLE_KEY},
     )
 
