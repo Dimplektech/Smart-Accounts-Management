@@ -14,6 +14,7 @@ from decouple import config
 from pathlib import Path
 import os
 import dj_database_url
+from google.oauth2 import service_account
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     "accounts",  # Custom app for managing accounts
     "scanner",  # Custom app for managing accounts
     "payments",  # Custom app for payment processing
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -167,3 +169,12 @@ LOGIN_URL = "/login/"
 STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 # STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
+
+# Google Cloud Storage Configuration
+
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'smart-account-management'
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+    os.path.join(BASE_DIR, 'smart-account-466007-9866e760e0e6.json')
+)
+MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'

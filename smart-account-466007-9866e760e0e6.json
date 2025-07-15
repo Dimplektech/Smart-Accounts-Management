@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "smart-account-466007",
+  "private_key_id": "9866e760e0e6ab2c4f6b0a5c186c63a5dd3f3be6",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCQXhu9inqVJhAc\naa60H2YelXh3hmBn9cRucR/xaq5TRJ3JvjbORrPgzkwhroEOfpGRFOXgzWZ1FO5c\ndC56JfTBdlTlSxdyhVHz/WHcerqBos+m05ntUNnS07zIuvxkXSynfRPcMWS0/1Fs\nyXW5CfDB3Rcz+DkJzBT2cb9reMhzQtKJJF1lxon+yXNDybpAcGFhyZy7Jc8RsfP8\nyN5+PflqL0Dq6zqa5Cgfa+Q1e6515ncsfmcpmUkFu/oq8jMe4IHqbPXPuwQBfNY4\n+oc8VPSZbdupGHuNwKbvxxxQH0mR0x6eIQ78bbW2NGW9DDQ8s27c6goNgs4EZDvV\nu+qkq1qJAgMBAAECggEAGFDFdtfxXBgoXAS/0GY+drXBr84CBFiMcHacxPZtLKiw\ns9dWF0mox9svTvf7lDOktG0y57lowZ0YJZnK7zdf4UrbMzCB3z/NxRzfA/nm2mlP\n9L8MnMBCo+QWVq/JzWS1HfOu6eYm2mZrcjl/Wr5uHtTscMwk3T3SpQyVC1axWlo8\nyH6oytJS9UsITR03UuQeaTd2EZkOLsFjddATnjS3h2GwtsQpMVXYspMpRWuKfL22\nHYRHX2+kTxaRMgC8qIOnXWZih5MSbXl9H4H7tZ/M9Ksb1GfEeQak8zeJ4mv6xUBz\noH5QHyNPK6oIT4YdXzoIWJeQr/Ui955XzDDQNVJpZQKBgQDL/t7PpbyOBWCSqGI5\nLzlMfo0pK+tvSHd1IWBB8GZdVMjI4VzlHPc6LOl3gAGJY3MSe+2jTfEmPf+2b9fG\nL563DXeeFSDQNosIGgfkqC8QpKdAeoG8bsTdsa06sm32L0b0E0h692sfHeEkpO5Q\nQ00k3OpyYoaDNq59XP67M/WdfQKBgQC1K85OEijSwN+W846YintqdWm6MgWfgUAO\nf5QoAd7IPq1V/I9KpNXJ8Af8UXQ7pJ0/K9V355+hWfnYNfQIeOaLxgtq2grr7Npy\nztWGIw002FXD4MKAUlhx4BwSE6aYTPfKtsXw0WpF3S7/9TtXUWMBdUPzT5bwUcyO\nLdxdFb9u/QKBgQCgrSuKmpydsJaUbZSQPiX/nl5JY5KZoJaW56cNyPCX6sQLlZa5\nz8rbQ6zQtz5+nJpyoLJYwneDC6pyZD2smK2GuVDSbwnddlikFPzKmb4YedhS7Stq\n5ESj6eLsLMZ39l0IuneIg4EYjUxctJwRFDGbK3ZuijQw/c0KaUkq4o4/cQKBgFWk\n6LkFYqEGpmwQpRc9V8xixuFLZlcZ3bM84kfrYmqdHonog8CQnbQBsXS4+M59KgzD\n5vzw1QiMpUxtbPhYVvw6WglgHAudg0MEvfHUPhj+L8USSkApLUBf5kUxXu7ea8E7\nl+UYyjlOrzo2rp+/jKMS0VWDCWJ/+Mg5q9OhRUbtAoGAbAyRM1k2T2B5NFUwhTI7\nqm2EixTOavociRJpUjnkb3fhlixLlvnkYEwtucgC8wg0G+/gNNJT2n33RQDM7xLZ\n6T7UarkQLDLxXdlhQ3FsyIGaAzPH/4fA9sUn43hNPx3mASK6/B51QNgnK65fAYUe\nKQM/d8avwaQmsJ2QjELrQyI=\n-----END PRIVATE KEY-----\n",
+  "client_email": "smart-account-management@smart-account-466007.iam.gserviceaccount.com",
+  "client_id": "111723612830105586741",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/smart-account-management%40smart-account-466007.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
