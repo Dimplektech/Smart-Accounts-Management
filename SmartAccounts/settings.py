@@ -175,6 +175,6 @@ STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'smart-account-management'
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
-    os.path.join(BASE_DIR, 'smart-account-466007-9866e760e0e6.json')
+    os.path.join(BASE_DIR, 'smart-account-466007-e30653e47fc8.json')
 )
 MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
